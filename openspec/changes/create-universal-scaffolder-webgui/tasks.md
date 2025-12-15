@@ -1,0 +1,13 @@
+- [x] Initialize Extension Structure <!-- id: 1 -->
+    - [x] Create `universal-data-api-builder` folder <!-- id: 2 -->
+    - [x] `npm init` and install `vscode`, `pg`, `mssql` <!-- id: 3 -->
+- [x] Implement Backend Services <!-- id: 4 -->
+    - [x] `PostgresService` for schema inspection <!-- id: 5 -->
+    - [x] `MssqlService` logic port <!-- id: 6 -->
+- [x] Implement Webview Frontend <!-- id: 7 -->
+    - [x] Set up React build pipeline (Webpack/Vite) <!-- id: 8 -->
+    - [x] Create `ConnectionForm` component <!-- id: 9 -->
+    - [x] Create `EntitySelector` component <!-- id: 10 -->
+- [x] Integrate & Test <!-- id: 11 -->
+    - [x] Wire up `postMessage` handlers <!-- id: 12 -->
+    - [x] Verify `dab-config.json` generation <!-- id: 13 -->

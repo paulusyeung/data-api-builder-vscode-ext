@@ -1,0 +1,52 @@
+{
+  "name": "universal-data-api-builder",
+  "displayName": "Universal Data API Builder Scaffolder",
+  "description": "Visual scaffolder for Data API Builder (DAB) supporting PostgreSQL and MSSQL",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dabExtension.universalScaffold",
+        "title": "DAB: Universal Scaffolder"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build:webview": "vite build --config vite.config.ts",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/mssql": "^9.1.8",
+    "@types/node": "^25.0.2",
+    "@types/pg": "^8.16.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@types/vscode": "^1.107.0",
+    "@vitejs/plugin-react": "^5.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
+  },
+  "dependencies": {
+    "@vscode/webview-ui-toolkit": "^1.4.0",
+    "mssql": "^12.2.0",
+    "pg": "^8.16.3",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  }
+}
