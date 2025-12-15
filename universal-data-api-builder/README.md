@@ -65,3 +65,35 @@ The extension is split into two parts: the **Extension Host** (Node.js) and the 
 3.  **Review**:
     -   The extension will generate `dab-config.json` in your workspace root.
     -   It will automatically open the file for you to review.
+
+## Workflow
+
+1.  **User Inputs**
+    -   Database Type: MS SQL/ PostgreSQL
+    -   Connection String
+
+2.  **Select Tables/Views**
+    -   Multiple selects on available Tables/ Views
+
+3.  **Output File Name**
+    -   Default to dab-config.json
+    -   Allow custom file name
+    -   Allow changing target directory
+
+4.  **Generate dab-config.json**
+    -   If dab-config.json not exist, initialize a new configuration file using:
+        ```bash
+        dab init --database-type ${cliDbType} --connection-string "${connectionString}" --config "${configFile}"
+        ```
+    -   If tables/views not exist, add a new entity definition using:
+        ```bash
+        dab add "${entityName}" --source "${source}" --permissions "anonymous:*" --config "${configFile}"
+        ```
+    -   If tables/views exist, update the entity using:
+        ```bash
+        dab update "${entityName}" --source "${source}" --permissions "anonymous:*" --config "${configFile}"
+        ```
+5.  **Options**
+    -   dab update [--map](https://learn.microsoft.com/en-us/azure/data-api-builder/command-line/dab-update#-m---map)
+    -   dab update [--relationship](https://learn.microsoft.com/en-us/azure/data-api-builder/command-line/dab-update#relationships)
+    Not every entity needs these options, use manual update instead.
