@@ -1,34 +1,277 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap');
+
 :root {
-  font-family: var(--vscode-font-family);
-  font-size: var(--vscode-font-size);
-  color: var(--vscode-foreground);
-  background-color: var(--vscode-editor-background);
+  /* Default Modern Theme (Fallback for Standalone) */
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+
+  /* Shared Tokens */
+  --border-radius-sm: 6px;
+  --border-radius-md: 10px;
+  --border-radius-lg: 16px;
+  --transition-speed: 0.25s;
+
+  /* Light Mode (Standalone) */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --accent-primary: #0078d4;
+  --accent-hover: #005a9e;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --panel-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --input-bg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-glass: rgba(15, 23, 42, 0.6);
+    --accent-primary: #3b82f6;
+    --accent-hover: #60a5fa;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --panel-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+    --input-bg: #111827;
+  }
+}
+
+/* VS Code Integration Override */
+body.vscode-light,
+body.vscode-dark,
+body.vscode-high-contrast {
+  --bg-primary: var(--vscode-editor-background);
+  --bg-secondary: var(--vscode-sideBar-background);
+  --bg-glass: var(--vscode-editor-background);
+  --accent-primary: var(--vscode-button-background);
+  --accent-hover: var(--vscode-button-hoverBackground);
+  --text-primary: var(--vscode-foreground);
+  --text-secondary: var(--vscode-descriptionForeground);
+  --border-color: var(--vscode-panel-border);
+  --input-bg: var(--vscode-input-background);
+  --font-main: var(--vscode-font-family);
+  --font-heading: var(--vscode-font-family);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  padding: 1rem;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-main);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  margin-top: 0;
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  max-width: 600px;
+  gap: 1.5rem;
+  max-width: 1000px;
   margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 1.5rem;
+  /* Padding moved here */
+  overflow: hidden;
+  /* App must not scroll, only the table */
+  animation: fadeIn 0.4s ease-out;
 }
 
-.form-group {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Premium Component Styling */
+
+.config-section,
+.action-section {
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--panel-shadow);
+}
+
+.selector-section {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  overflow: hidden;
+  /* Prevent parent from growing */
 }
 
-.button-group {
+.tab-content-container {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
+  flex-direction: column;
+  border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+  box-shadow: var(--panel-shadow);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  overflow: hidden;
+  /* Crucial for inner scrolling */
 }
 
-vscode-data-grid {
-  margin-top: 1rem;
+.entity-table-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto !important;
+  /* Force browser to acknowledge scroll */
+  overflow-x: hidden;
+  height: 100%;
+  /* Force height occupation */
+}
+
+.index-tab {
+  border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0 !important;
+  font-family: var(--font-heading);
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  padding: 10px 30px !important;
+}
+
+.index-tab.active {
+  background: linear-gradient(to bottom, var(--accent-primary), var(--bg-secondary)) !important;
+  color: #fff !important;
+  border-bottom-color: var(--bg-secondary) !important;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Custom styles for vscode components in standalone mode */
+vscode-button {
+  --button-primary-background: var(--accent-primary);
+  --button-primary-hover-background: var(--accent-hover);
+  --button-secondary-background: transparent;
+  --button-secondary-foreground: var(--text-primary);
+  --border-radius: var(--border-radius-sm);
+  font-family: var(--font-main);
+  transition: transform 0.1s;
+}
+
+vscode-button:active {
+  transform: scale(0.98);
+}
+
+vscode-text-field,
+vscode-checkbox,
+vscode-dropdown {
+  --input-background: var(--input-bg);
+  --input-foreground: var(--text-primary);
+  --input-border: var(--border-color);
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 2rem;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  text-align: center;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-icon {
+  font-size: 3rem;
+  color: #10b981;
+  margin-bottom: 1rem;
+}
+
+.modal-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.modal-message {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
 }

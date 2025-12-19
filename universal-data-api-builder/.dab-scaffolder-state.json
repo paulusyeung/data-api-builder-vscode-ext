@@ -1,0 +1,5 @@
+{
+  "dbType": "mssql",
+  "connectionString": "Server=192.168.12.146,1433;Database=xPort5;User Id=sa;Password=nx@82279602;TrustServerCertificate=true;Encrypt=True",
+  "targetFolder": "C:\\Shared\\xPort5\\database"
+}

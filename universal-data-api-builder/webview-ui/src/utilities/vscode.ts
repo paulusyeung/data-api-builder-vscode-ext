@@ -18,11 +18,30 @@ class VSCodeAPIWrapper {
      *
      * @param message The message to send.
      */
-    public postMessage(message: unknown) {
+    public async postMessage(message: any) {
         if (this.vsCodeApi) {
             this.vsCodeApi.postMessage(message);
         } else {
             console.log("VS Code API not available (running in browser?)", message);
+            try {
+                const response = await fetch("http://localhost:5000/api/message", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(message),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data) {
+                        // Dispatch a message event to simulate VS Code response
+                        window.postMessage(data, "*");
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to communicate with standalone server:", err);
+            }
         }
     }
 

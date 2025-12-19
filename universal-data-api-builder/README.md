@@ -42,11 +42,23 @@ The extension is split into two parts: the **Extension Host** (Node.js) and the 
 
 ## Running the Extension
 
+There are two ways to run the scaffolder:
+
+### 1. Standalone Mode (Recommended for testing)
+This runs the scaffolder in your standard web browser, avoiding the need to launch a new VS Code window.
+
+1.  Open the `universal-data-api-builder` folder in a terminal.
+2.  Run the command:
+    ```bash
+    npm run web
+    ```
+3.  The scaffolder will automatically open in your default browser at `http://localhost:5000`.
+
+### 2. VS Code Extension Mode
 1.  Open the `universal-data-api-builder` folder in VS Code.
 2.  Press **F5** to start debugging. This will open a new "Extension Development Host" window.
-3.  **Important**: In the new debug window, verify that a workspace folder is open (use File > Open Folder... to select the location where you want to save the generated `dab-config.json` file). The extension requires an open folder to save the generated `dab-config.json` file.
-4.  Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`).
-5.  Run the command: **`DAB: Universal Scaffolder`**.
+3.  Open the Command Palette (`Ctrl+Shift+P`).
+4.  Run: **`DAB: Universal Scaffolder`**.
 
 ## Usage Guide
 

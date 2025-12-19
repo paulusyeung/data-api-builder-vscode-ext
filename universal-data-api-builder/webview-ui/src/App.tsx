@@ -8,6 +8,7 @@ const App = () => {
     const [loading, setLoading] = useState(false);
     const [tables, setTables] = useState<any[]>([]);
 
+    const [targetFolder, setTargetFolder] = useState<string>('');
     const [initialState, setInitialState] = useState<{ dbType: string; connectionString: string } | undefined>(undefined);
 
     useEffect(() => {
@@ -19,11 +20,22 @@ const App = () => {
             switch (message.command) {
                 case 'init':
                     setInitialState({ dbType: message.dbType, connectionString: message.connectionString });
+                    setTargetFolder(message.targetFolder || '');
+                    break;
+                case 'folderPicked':
+                    setTargetFolder(message.path);
                     break;
                 case 'tablesLoaded':
                     setTables(message.tables);
                     setLoading(false);
                     setView('select');
+                    break;
+                case 'generated':
+                    setLoading(false);
+                    // Pass a signal to EntitySelector that generation was successful
+                    setTables(prev => [...prev]); // Trigger re-render with same data but new signal if needed
+                    // Actually, let's use a dedicated state or event
+                    window.dispatchEvent(new CustomEvent('dab-generated', { detail: message }));
                     break;
                 case 'error':
                     setLoading(false);
@@ -38,10 +50,7 @@ const App = () => {
     }, []);
 
     return (
-        <main>
-            <h1>Universal DAB Scaffolder</h1>
-            <vscode-divider></vscode-divider>
-
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {view === 'connect' && (
                 <ConnectForm isLoading={loading} initialState={initialState} />
             )}
@@ -49,6 +58,7 @@ const App = () => {
             {view === 'select' && (
                 <EntitySelector
                     tables={tables}
+                    targetFolder={targetFolder}
                     onBack={() => setView('connect')}
                 />
             )}

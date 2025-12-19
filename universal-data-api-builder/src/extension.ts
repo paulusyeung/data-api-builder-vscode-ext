@@ -67,8 +67,24 @@ class UniversalScaffolderPanel {
                         this._panel.webview.postMessage({
                             command: 'init',
                             dbType: savedDbType,
-                            connectionString: savedConnStr
+                            connectionString: savedConnStr,
+                            targetFolder: context.globalState.get<string>('dab.targetFolder') || (vscode.workspace.workspaceFolders?.[0].uri.fsPath || '')
                         });
+                        break;
+                    case 'pickFolder':
+                        const options: vscode.OpenDialogOptions = {
+                            canSelectMany: false,
+                            canSelectFolders: true,
+                            canSelectFiles: false,
+                            openLabel: 'Select target folder'
+                        };
+                        const folderUri = await vscode.window.showOpenDialog(options);
+                        if (folderUri && folderUri[0]) {
+                            this._panel.webview.postMessage({
+                                command: 'folderPicked',
+                                path: folderUri[0].fsPath
+                            });
+                        }
                         break;
                     case 'connect':
                         // Save state
@@ -77,6 +93,8 @@ class UniversalScaffolderPanel {
                         await this._handleConnect(message);
                         break;
                     case 'generateConfig':
+                        // Save target folder
+                        await context.globalState.update('dab.targetFolder', message.targetFolder);
                         await this._handleGenerate(message);
                         break;
                 }
@@ -109,12 +127,12 @@ class UniversalScaffolderPanel {
 
     private async _handleGenerate(message: any) {
         try {
-            const folders = vscode.workspace.workspaceFolders;
-            if (!folders) {
-                throw new Error('No workspace open');
+            const targetFolder = message.targetFolder;
+            if (!targetFolder) {
+                throw new Error('Please select a target folder.');
             }
 
-            const configService = new ConfigService(folders[0].uri.fsPath);
+            const configService = new ConfigService(targetFolder);
 
             const outputPath = await configService.generateConfig(
                 this._currentDbType === 'postgres' ? 'postgresql' : 'mssql',

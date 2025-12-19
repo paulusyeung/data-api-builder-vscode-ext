@@ -11,7 +11,7 @@ export class ConfigService {
     async generateConfig(
         dbType: string,
         connectionString: string,
-        tables: Array<{ schema: string; name: string; type: string }>,
+        tables: Array<{ schema: string; name: string; type: 'table' | 'view'; keyFields: string[]; columns: string[] }>,
         filename: string = 'dab-config.json'
     ): Promise<string> {
         const configFile = filename;
@@ -26,51 +26,70 @@ export class ConfigService {
 
         // 2. Initialize if file does not exist
         if (!fs.existsSync(configPath)) {
-            // dab init --database-type <type> --connection-string <string> --config <file>
-            // Note: dab init wants 'mssql' or 'postgresql', which matches our valid types usually but let's map carefully.
-            // Our internal dbType: 'mssql' | 'postgres' (from UI)
-            // DAB CLI types: 'mssql', 'postgresql', 'cosmosdb_js', 'mysql'
             const cliDbType = dbType === 'postgres' ? 'postgresql' : 'mssql';
-
             await this._runCommand(`dab init --database-type ${cliDbType} --connection-string "${connectionString}" --config "${configFile}"`);
-        } else {
-            // If file exists, maybe we should warn? Or just assume the user wants to append?
-            // User requested "allow update", so we just proceed to add entities.
         }
 
-        // 3. Add entities
-        for (const table of tables) {
-            const entityName = table.name; // Simple friendly name
+        // 3. Add/Update entities
+        // Sort tables by name to ensure consistent iteration order
+        const sortedTables = [...tables].sort((a, b) => a.name.localeCompare(b.name));
+
+        for (const table of sortedTables) {
+            const entityName = table.name;
             const source = `${table.schema}.${table.name}`;
+            const keyFieldsStr = table.keyFields.length > 0 ? `--source.key-fields "${table.keyFields.join(',')}"` : '';
+            const sourceTypeStr = table.type === 'view' ? '--source.type "view"' : '';
+            const restStr = `--rest "${entityName}"`;
+
+            // Note: DAB add doesn't support --map directly, we usually do dab add then dab update for mapping.
+            // Or use dab add with minimal info then update.
 
             try {
-                // dab add <name> --source <source> --permissions "anonymous:*" --config <file>
-                // DAB might error if entity exists.
-                await this._runCommand(`dab add "${entityName}" --source "${source}" --permissions "anonymous:*" --config "${configFile}"`);
-            } catch (error: any) {
-                // If it fails, check if it's because it already exists. 
-                // We can try 'dab update' or just log it.
-                // DAB CLI doesn't have an easy "add or update" flag.
-                // For now, if add fails, we assume it exists and try 'dab update' to ensure permissions? 
-                // Actually 'dab update' updates the *entity configuration*.
-                // Let's try to update sources and permissions if add fails.
+                // TRY ADD FIRST
+                // dab add <name> --source <source> [options]
+                let addCmd = `dab add "${entityName}" --source "${source}" ${sourceTypeStr} ${keyFieldsStr} ${restStr} --permissions "anonymous:*" --config "${configFile}"`;
+                await this._runCommand(addCmd);
+            } catch (error) {
+                // IF ADD FAILS, TRY UPDATE
+                let updateCmd = `dab update "${entityName}" --source "${source}" ${sourceTypeStr} ${keyFieldsStr} ${restStr} --config "${configFile}"`;
+                await this._runCommand(updateCmd);
+            }
+
+            // 4. MAPPING
+            // dab update <name> --map "Col1:Col1,Col2:Col2..."
+            if (table.columns && table.columns.length > 0) {
+                const mapValue = table.columns.map(c => `${c}:${c}`).join(',');
                 try {
-                    await this._runCommand(`dab update "${entityName}" --source "${source}" --permissions "anonymous:*" --config "${configFile}"`);
-                } catch (updateError: any) {
-                    console.warn(`Failed to add or update entity ${entityName}: ${updateError.message}`);
+                    await this._runCommand(`dab update "${entityName}" --map "${mapValue}" --config "${configFile}"`);
+                } catch (mapError) {
+                    console.warn(`Failed to update mapping for ${entityName}:`, mapError);
                 }
             }
+        }
+
+        // 5. Final pass: Alphabetize the entities object in the JSON file
+        try {
+            const configContent = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            if (configContent.entities) {
+                const sortedEntities: any = {};
+                Object.keys(configContent.entities)
+                    .sort()
+                    .forEach(key => {
+                        sortedEntities[key] = configContent.entities[key];
+                    });
+                configContent.entities = sortedEntities;
+                fs.writeFileSync(configPath, JSON.stringify(configContent, null, 2), 'utf8');
+            }
+        } catch (sortError) {
+            console.warn(`Failed to perform final sort on dab-config.json:`, sortError);
         }
 
         return configPath;
     }
 
     private async _runCommand(command: string): Promise<string> {
-        // Execute in workspace root
         const { stdout, stderr } = await exec(command, { cwd: this.workspaceRoot });
-        if (stderr && !stderr.includes('Suggested update')) {
-            // dab sometimes writes non-error info to stderr? No, usually it's clean.
-            // But let's log it if present.
+        if (stderr && !stderr.includes('Suggested update') && !stderr.includes('already exists')) {
             console.log(`DAB CLI Stderr: ${stderr}`);
         }
         return stdout;
